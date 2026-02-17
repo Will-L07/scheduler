@@ -192,6 +192,8 @@ const CloudSync = (() => {
                 }
             } else {
                 // No cloud data yet — push local data up
+                // Must reset isSyncing so syncToCloud doesn't skip
+                isSyncing = false;
                 await syncToCloud();
             }
         } catch (e) {
