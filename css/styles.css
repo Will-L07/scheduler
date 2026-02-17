@@ -815,6 +815,21 @@ body {
     color: white;
 }
 
+/* Cloud sync status */
+.sync-status {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    background: var(--bg-tertiary);
+    display: inline-block;
+}
+
+.sync-status.sync-connected {
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+}
+
 /* Toggle switch */
 .switch {
     position: relative;

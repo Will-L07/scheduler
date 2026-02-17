@@ -1,5 +1,5 @@
 // Service Worker for William's Scheduler PWA
-const CACHE_NAME = 'ws-cache-v1';
+const CACHE_NAME = 'ws-cache-v2';
 
 // Files to cache for offline use
 const PRECACHE_URLS = [
@@ -9,6 +9,7 @@ const PRECACHE_URLS = [
     './css/styles.css',
     './js/data.js',
     './js/seed-data.js',
+    './js/firebase-sync.js',
     './js/notifications.js',
     './js/pdf-parser.js',
     './js/app.js',

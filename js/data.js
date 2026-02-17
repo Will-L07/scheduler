@@ -29,6 +29,10 @@ const DataStore = (() => {
     function save(key, data) {
         try {
             localStorage.setItem(key, JSON.stringify(data));
+            // Notify cloud sync if available
+            if (typeof CloudSync !== 'undefined' && CloudSync.onDataChanged) {
+                CloudSync.onDataChanged();
+            }
         } catch (e) {
             console.error('Failed to save', key, e);
         }

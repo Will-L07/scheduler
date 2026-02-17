@@ -14,6 +14,20 @@ const App = (() => {
         setupSchedules();
         PdfParser.init();
         Notifications.init();
+        CloudSync.init();
+        setupCloudSync();
+        renderDashboard();
+    }
+
+    // ---- Cloud Sync UI ----
+    function setupCloudSync() {
+        const signInBtn = document.getElementById('cloudSignIn');
+        const signOutBtn = document.getElementById('cloudSignOut');
+        if (signInBtn) signInBtn.addEventListener('click', () => CloudSync.signIn());
+        if (signOutBtn) signOutBtn.addEventListener('click', () => CloudSync.signOut());
+    }
+
+    function refresh() {
         renderDashboard();
     }
 
@@ -763,7 +777,7 @@ const App = (() => {
     }
 
     // Expose for other modules
-    return { init, switchView, showToast, renderDashboard };
+    return { init, switchView, showToast, renderDashboard, refresh };
 })();
 
 // ---- Start ----
