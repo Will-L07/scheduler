@@ -93,7 +93,15 @@ const CloudSync = (() => {
         } catch (e) {
             if (e.code === 'auth/popup-closed-by-user') return;
             console.error('Sign-in failed:', e);
-            App.showToast('Sign-in failed. Try again.', 'error');
+            if (e.code === 'auth/unauthorized-domain') {
+                App.showToast('Domain not authorized in Firebase. Add this domain in Firebase Console → Authentication → Settings → Authorized domains.', 'error');
+            } else if (e.code === 'auth/operation-not-allowed') {
+                App.showToast('Google sign-in not enabled. Enable it in Firebase Console → Authentication → Sign-in method.', 'error');
+            } else if (e.code === 'auth/popup-blocked') {
+                App.showToast('Pop-up blocked by browser. Allow pop-ups for this site.', 'error');
+            } else {
+                App.showToast(`Sign-in failed: ${e.code || e.message}`, 'error');
+            }
         }
     }
 
