@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>William's Scheduler</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4A90D9">
+
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WScheduler">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo">WS</h1>
+            <span class="logo-text">William's Scheduler</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link active" data-view="dashboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span>Dashboard</span>
+            </a></li>
+            <li><a href="#" class="nav-link" data-view="schedules">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Schedules</span>
+            </a></li>
+            <li><a href="#" class="nav-link" data-view="progress">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                <span>Progress</span>
+            </a></li>
+            <li><a href="#" class="nav-link" data-view="notes">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <span>Notes</span>
+            </a></li>
+            <li><a href="#" class="nav-link" data-view="import">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Import PDF</span>
+            </a></li>
+            <li><a href="#" class="nav-link" data-view="settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Settings</span>
+            </a></li>
+        </ul>
+    </nav>
+
+    <!-- Mobile hamburger -->
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+    </button>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+
+        <!-- ========== DASHBOARD ========== -->
+        <section class="view active" id="view-dashboard">
+            <div class="view-header">
+                <h2>Dashboard</h2>
+                <p class="date-display" id="currentDate"></p>
+            </div>
+
+            <!-- Exam Countdowns -->
+            <div class="section-title">Upcoming Exams</div>
+            <div class="exam-countdowns" id="examCountdowns"></div>
+
+            <!-- Today's Tasks -->
+            <div class="section-title">Today's Tasks</div>
+            <div class="today-tasks" id="todayTasks"></div>
+
+            <!-- Quick Stats -->
+            <div class="section-title">Quick Stats</div>
+            <div class="stats-grid" id="quickStats"></div>
+
+            <!-- Current Phase -->
+            <div class="section-title">Current Phases</div>
+            <div class="phases-display" id="currentPhases"></div>
+        </section>
+
+        <!-- ========== SCHEDULES ========== -->
+        <section class="view" id="view-schedules">
+            <div class="view-header">
+                <h2>Schedules</h2>
+                <button class="btn btn-primary" id="addScheduleBtn">+ Add Schedule</button>
+            </div>
+            <div class="schedules-list" id="schedulesList"></div>
+        </section>
+
+        <!-- ========== PROGRESS ========== -->
+        <section class="view" id="view-progress">
+            <div class="view-header">
+                <h2>Progress</h2>
+            </div>
+            <div class="progress-overview" id="progressOverview"></div>
+            <div class="section-title">By Schedule</div>
+            <div class="progress-by-schedule" id="progressBySchedule"></div>
+            <div class="section-title">By Subject</div>
+            <div class="progress-by-subject" id="progressBySubject"></div>
+            <div class="section-title">Streak</div>
+            <div class="streak-display" id="streakDisplay"></div>
+        </section>
+
+        <!-- ========== NOTES ========== -->
+        <section class="view" id="view-notes">
+            <div class="view-header">
+                <h2>Notes & Journal</h2>
+                <button class="btn btn-primary" id="addNoteBtn">+ New Entry</button>
+            </div>
+            <div class="notes-filter">
+                <input type="text" class="search-input" id="notesSearch" placeholder="Search notes...">
+            </div>
+            <div class="notes-list" id="notesList"></div>
+
+            <!-- New Note Modal -->
+            <div class="modal" id="noteModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="noteModalTitle">New Journal Entry</h3>
+                        <button class="modal-close" id="closeNoteModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Title</label>
+                        <input type="text" id="noteTitle" class="form-input" placeholder="Entry title...">
+                        <label>Category</label>
+                        <select id="noteCategory" class="form-input">
+                            <option value="general">General</option>
+                            <option value="revision">Revision</option>
+                            <option value="training">Training</option>
+                            <option value="reflection">Reflection</option>
+                        </select>
+                        <label>Content</label>
+                        <textarea id="noteContent" class="form-textarea" rows="6" placeholder="Write your notes..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" id="cancelNote">Cancel</button>
+                        <button class="btn btn-primary" id="saveNote">Save</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== PDF IMPORT ========== -->
+        <section class="view" id="view-import">
+            <div class="view-header">
+                <h2>Import PDF Schedule</h2>
+            </div>
+            <div class="import-container">
+                <!-- Step 1: Upload -->
+                <div class="import-step" id="importStep1">
+                    <div class="upload-zone" id="uploadZone">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <p>Drag & drop a PDF here, or click to browse</p>
+                        <input type="file" id="pdfFileInput" accept=".pdf" hidden>
+                    </div>
+                </div>
+
+                <!-- Step 2: Review extracted text -->
+                <div class="import-step hidden" id="importStep2">
+                    <h3>Extracted Text</h3>
+                    <p class="hint">Review the extracted text below. Edit if needed, then continue to create schedule entries.</p>
+                    <textarea id="extractedText" class="form-textarea" rows="15"></textarea>
+                    <div class="import-actions">
+                        <button class="btn btn-secondary" id="importBack1">Back</button>
+                        <button class="btn btn-primary" id="importNext2">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Name and confirm -->
+                <div class="import-step hidden" id="importStep3">
+                    <h3>Create Schedule</h3>
+                    <label>Schedule Name</label>
+                    <input type="text" id="importName" class="form-input" placeholder="e.g., Chemistry Revision">
+                    <label>Type</label>
+                    <select id="importType" class="form-input">
+                        <option value="revision">Revision / Academic</option>
+                        <option value="training">Training / Fitness</option>
+                        <option value="custom">Other</option>
+                    </select>
+                    <label>Color</label>
+                    <input type="color" id="importColor" class="form-color" value="#4A90D9">
+
+                    <h4>Entries</h4>
+                    <p class="hint">Add entries manually or they'll be parsed from the text above.</p>
+                    <div id="importEntries"></div>
+                    <button class="btn btn-secondary" id="addManualEntry">+ Add Entry</button>
+
+                    <div class="import-actions">
+                        <button class="btn btn-secondary" id="importBack2">Back</button>
+                        <button class="btn btn-primary" id="importSave">Save Schedule</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SETTINGS ========== -->
+        <section class="view" id="view-settings">
+            <div class="view-header">
+                <h2>Settings</h2>
+            </div>
+            <div class="settings-group">
+                <h3>Appearance</h3>
+                <div class="setting-row">
+                    <label>Theme</label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" data-theme="light">Light</button>
+                        <button class="toggle-btn" data-theme="dark">Dark</button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>Notifications</h3>
+                <div class="setting-row">
+                    <label>Enable browser notifications</label>
+                    <label class="switch">
+                        <input type="checkbox" id="notifToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <label>Remind me before tasks</label>
+                    <select id="reminderTime" class="form-input form-input-small">
+                        <option value="10">10 minutes</option>
+                        <option value="30" selected>30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
+            </div>
+            <div class="settings-group">
+                <h3>Data</h3>
+                <div class="setting-row">
+                    <label>Export all data as JSON backup</label>
+                    <button class="btn btn-secondary" id="exportDataBtn">Export</button>
+                </div>
+                <div class="setting-row">
+                    <label>Import data from JSON backup</label>
+                    <button class="btn btn-secondary" id="importDataBtn">Import</button>
+                    <input type="file" id="importDataFile" accept=".json" hidden>
+                </div>
+                <div class="setting-row">
+                    <label>Reset all data (cannot be undone)</label>
+                    <button class="btn btn-danger" id="resetDataBtn">Reset</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast container for notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/seed-data.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/pdf-parser.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Register service worker for PWA / offline -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registered:', reg.scope))
+                .catch(err => console.warn('SW registration failed:', err));
+        }
+    </script>
+</body>
+</html>
