@@ -7,12 +7,12 @@ const CloudSync = (() => {
     // ---- Firebase Config ----
     // REPLACE with your Firebase project config from console.firebase.google.com
     const firebaseConfig = {
-        apiKey: "",
-        authDomain: "",
-        projectId: "",
-        storageBucket: "",
-        messagingSenderId: "",
-        appId: ""
+        apiKey: "AIzaSyBbMqJeeaOuT6g41zUHy9or2U1_ivRtkQE",
+        authDomain: "williams-scheduler.firebaseapp.com",
+        projectId: "williams-scheduler",
+        storageBucket: "williams-scheduler.firebasestorage.app",
+        messagingSenderId: "952580319953",
+        appId: "1:952580319953:web:50d9d523b6c908e56433f0"
     };
 
     let db = null;
