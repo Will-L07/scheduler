@@ -470,6 +470,7 @@ const DataStore = (() => {
         getOverallProgress,
         getStreak,
         getNotes,
+        saveNotes,
         addNote,
         updateNote,
         deleteNote,
