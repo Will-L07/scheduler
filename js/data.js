@@ -407,8 +407,30 @@ const DataStore = (() => {
     function importAll(jsonStr) {
         try {
             const data = JSON.parse(jsonStr);
-            if (data.schedules) saveSchedules(data.schedules);
-            if (data.notes) saveNotes(data.notes);
+            if (data.schedules) {
+                // Merge: add new schedules, update existing ones by ID
+                const existing = getSchedules();
+                const existingIds = new Set(existing.map(s => s.id));
+                data.schedules.forEach(imported => {
+                    if (existingIds.has(imported.id)) {
+                        // Replace existing schedule with imported version
+                        const idx = existing.findIndex(s => s.id === imported.id);
+                        existing[idx] = imported;
+                    } else {
+                        existing.push(imported);
+                    }
+                });
+                saveSchedules(existing);
+            }
+            if (data.notes) {
+                // Merge: add notes that don't already exist
+                const existing = getNotes();
+                const existingIds = new Set(existing.map(n => n.id));
+                data.notes.forEach(note => {
+                    if (!existingIds.has(note.id)) existing.push(note);
+                });
+                saveNotes(existing);
+            }
             if (data.settings) saveSettings(data.settings);
             return true;
         } catch (e) {

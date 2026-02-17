@@ -58,10 +58,10 @@ const PdfParser = (() => {
             e.preventDefault();
             zone.classList.remove('dragover');
             const file = e.dataTransfer.files[0];
-            if (file && file.type === 'application/pdf') {
+            if (file && (file.type === 'application/pdf' || file.name.endsWith('.json'))) {
                 handleFile(file);
             } else {
-                App.showToast('Please upload a PDF file.', 'warning');
+                App.showToast('Please upload a PDF or JSON file.', 'warning');
             }
         });
 
@@ -74,6 +74,11 @@ const PdfParser = (() => {
 
     // ---- Handle uploaded file ----
     async function handleFile(file) {
+        // JSON files: import directly as schedule data
+        if (file.name.endsWith('.json')) {
+            return handleJsonFile(file);
+        }
+
         App.showToast('Processing PDF...', 'info');
 
         try {
@@ -106,6 +111,26 @@ const PdfParser = (() => {
             extractedText = '';
             document.getElementById('extractedText').value = '';
             showStep(2);
+        }
+    }
+
+    // ---- Handle JSON schedule file ----
+    async function handleJsonFile(file) {
+        try {
+            const text = await file.text();
+            const success = DataStore.importAll(text);
+            if (success) {
+                const data = JSON.parse(text);
+                const count = (data.schedules || []).reduce((sum, s) => sum + (s.entries || []).length, 0);
+                const names = (data.schedules || []).map(s => s.name).join(', ');
+                App.showToast(`Imported "${names}" with ${count} entries!`, 'success');
+                App.switchView('schedules');
+            } else {
+                App.showToast('Invalid JSON format. Needs a "schedules" array.', 'error');
+            }
+        } catch (e) {
+            console.error('JSON import error:', e);
+            App.showToast('Error reading JSON file.', 'error');
         }
     }
 
