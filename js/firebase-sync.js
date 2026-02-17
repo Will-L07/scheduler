@@ -145,6 +145,7 @@ const CloudSync = (() => {
         } catch (e) {
             console.error('CloudSync: Push failed:', e);
             updateSyncStatus('Sync failed');
+            App.showToast(`Sync push failed: ${e.code || e.message}`, 'error');
         } finally {
             isSyncing = false;
         }
@@ -196,6 +197,7 @@ const CloudSync = (() => {
         } catch (e) {
             console.error('CloudSync: Pull failed:', e);
             updateSyncStatus('Sync failed');
+            App.showToast(`Sync pull failed: ${e.code || e.message}`, 'error');
         } finally {
             isSyncing = false;
         }
@@ -321,7 +323,7 @@ const CloudSync = (() => {
         const signOutBtn = document.getElementById('cloudSignOut');
         const userInfoEl = document.getElementById('syncUserInfo');
 
-        if (!statusEl) return;
+        if (!statusEl || !signInBtn || !signOutBtn || !userInfoEl) return;
 
         if (currentUser) {
             signInBtn.classList.add('hidden');

@@ -1,5 +1,5 @@
 // Service Worker for William's Scheduler PWA
-const CACHE_NAME = 'ws-cache-v2';
+const CACHE_NAME = 'ws-cache-v3';
 
 // Files to cache for offline use
 const PRECACHE_URLS = [
@@ -58,16 +58,14 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // CSS/JS assets: cache first, fall back to network
+    // CSS/JS assets: network first, fall back to cache
     event.respondWith(
-        caches.match(event.request)
-            .then(cached => {
-                if (cached) return cached;
-                return fetch(event.request).then(response => {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                    return response;
-                });
+        fetch(event.request)
+            .then(response => {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                return response;
             })
+            .catch(() => caches.match(event.request))
     );
 });
