@@ -310,7 +310,10 @@ const App = (() => {
     function showRagPicker(itemEl, scheduleId, entryId, forDate) {
         // Don't show RAG for non-academic schedules (training types have no topicGroups)
         const schedule = DataStore.getScheduleById(scheduleId);
-        if (!schedule || !schedule.topicGroups) return;
+        if (!schedule || !schedule.topicGroups) {
+            renderDashboard();
+            return;
+        }
 
         // Remove any existing picker
         const existing = itemEl.querySelector('.rag-picker');
