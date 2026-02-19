@@ -307,11 +307,12 @@ const App = (() => {
     }
 
     // ---- RAG Confidence Picker ----
-    function showRagPicker(itemEl, scheduleId, entryId, forDate) {
+    function showRagPicker(itemEl, scheduleId, entryId, forDate, onComplete) {
+        const done = onComplete || renderDashboard;
         // Don't show RAG for non-academic schedules (training types have no topicGroups)
         const schedule = DataStore.getScheduleById(scheduleId);
         if (!schedule || !schedule.topicGroups) {
-            renderDashboard();
+            done();
             return;
         }
 
@@ -338,7 +339,7 @@ const App = (() => {
                     DataStore.setEntryConfidence(scheduleId, entryId, rating, forDate);
                 }
                 picker.remove();
-                renderDashboard();
+                done();
             });
         });
     }
@@ -540,8 +541,19 @@ const App = (() => {
                 const entryId = item.dataset.entryId;
                 const forDate = item.dataset.forDate || null;
                 DataStore.toggleEntryComplete(scheduleId, entryId, forDate);
-                // Don't full re-render, just toggle class
                 item.classList.toggle('completed');
+            });
+        });
+
+        // Wire up RAG rate buttons
+        container.querySelectorAll('.entry-rate-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = btn.closest('.schedule-entry');
+                const scheduleId = item.dataset.scheduleId;
+                const entryId = item.dataset.entryId;
+                const forDate = item.dataset.forDate;
+                showRagPicker(item, scheduleId, entryId, forDate, () => renderSchedules());
             });
         });
     }
@@ -608,13 +620,21 @@ const App = (() => {
                         const recurringInfo = isRecurring && totalCompleted > 0
                             ? `<span style="font-size:0.75rem; color:var(--success); margin-left:0.5rem;">${totalCompleted} done</span>`
                             : '';
+                        const entryForDate = isRecurring ? completionKey : (entry.date || today);
+                        const currentConf = isRecurring
+                            ? ((entry.confidenceByDate || {})[completionKey] || null)
+                            : (entry.confidence || null);
+                        const rateBtn = schedule.topicGroups
+                            ? `<button class="entry-rate-btn ${currentConf || ''}" title="${currentConf ? 'Confidence: ' + currentConf + ' — click to change' : 'Rate confidence'}">${currentConf ? currentConf[0].toUpperCase() : '?'}</button>`
+                            : '';
                         return `
-                            <div class="schedule-entry ${isCompletedToday ? 'completed' : ''}" data-schedule-id="${schedule.id}" data-entry-id="${entry.id}" data-for-date="${isRecurring ? completionKey : ''}">
+                            <div class="schedule-entry ${isCompletedToday ? 'completed' : ''}" data-schedule-id="${schedule.id}" data-entry-id="${entry.id}" data-for-date="${entryForDate}">
                                 <input type="checkbox" class="task-checkbox" ${isCompletedToday ? 'checked' : ''}>
                                 <span class="entry-day">${dayLabel}</span>
                                 <span class="task-subject" data-subject="${escHtml(entry.subject)}" ${subjectBadgeStyle(entry.subject, schedule.id)}>${escHtml(entry.subject)}</span>
                                 <span style="flex:1; font-size: 0.85rem;">${escHtml(entry.topic)}${recurringInfo}</span>
                                 <span class="task-duration">${escHtml(entry.duration)}</span>
+                                ${rateBtn}
                             </div>
                         `;
                     }).join('')}
