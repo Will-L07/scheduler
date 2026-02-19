@@ -38,6 +38,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
                 <span>Progress</span>
             </a></li>
+            <li><a href="#" class="nav-link" data-view="analysis">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <span>Analysis</span>
+            </a></li>
             <li><a href="#" class="nav-link" data-view="notes">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 <span>Notes</span>
@@ -83,6 +87,10 @@
             <!-- Current Phase -->
             <div class="section-title">Current Phases</div>
             <div class="phases-display" id="currentPhases"></div>
+
+            <!-- Weak Areas -->
+            <div class="section-title" id="weakAreasSectionTitle" style="display:none;">Weak Areas (Last 14 Days)</div>
+            <div class="weak-areas-display" id="weakAreasDisplay"></div>
         </section>
 
         <!-- ========== SCHEDULES ========== -->
@@ -202,6 +210,15 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- ========== ANALYSIS ========== -->
+        <section class="view" id="view-analysis">
+            <div class="view-header">
+                <h2>Confidence Analysis</h2>
+            </div>
+            <p class="hint" style="margin-bottom:1.5rem;">Rate your confidence on each topic as you complete tasks (Red / Amber / Green). Analysis is shown here once you have rated at least one topic.</p>
+            <div id="analysisContent"></div>
         </section>
 
         <!-- ========== SETTINGS ========== -->

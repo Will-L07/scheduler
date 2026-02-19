@@ -475,6 +475,72 @@ const DataStore = (() => {
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
+    // ---- Confidence (RAG) ----
+    function setEntryConfidence(scheduleId, entryId, confidence, forDate) {
+        const entry = getEntry(scheduleId, entryId);
+        if (!entry) return;
+        if (entry.dayOfWeek && forDate) {
+            const confidenceByDate = { ...(entry.confidenceByDate || {}), [forDate]: confidence };
+            return updateEntry(scheduleId, entryId, { confidenceByDate });
+        } else {
+            return updateEntry(scheduleId, entryId, { confidence });
+        }
+    }
+
+    function getConfidenceAnalysis() {
+        const results = [];
+        getSchedules().forEach(schedule => {
+            if (!schedule.topicGroups) return;
+            const scheduleResult = { scheduleName: schedule.name, scheduleColor: schedule.color, subjectColors: schedule.subjectColors || {}, groups: [] };
+            Object.entries(schedule.topicGroups).forEach(([groupName, topics]) => {
+                const ratings = { red: 0, amber: 0, green: 0, total: 0 };
+                let lastRated = null;
+                schedule.entries.forEach(entry => {
+                    if (!topics.includes(entry.topic)) return;
+                    if (entry.dayOfWeek) {
+                        Object.entries(entry.confidenceByDate || {}).forEach(([date, c]) => {
+                            if (c && ratings[c] !== undefined) { ratings[c]++; ratings.total++; }
+                            if (!lastRated || date > lastRated) lastRated = date;
+                        });
+                    } else if (entry.confidence) {
+                        ratings[entry.confidence]++;
+                        ratings.total++;
+                        if (!lastRated || (entry.completedAt && entry.completedAt > lastRated)) lastRated = entry.completedAt;
+                    }
+                });
+                if (ratings.total > 0) {
+                    scheduleResult.groups.push({ groupName, ratings, lastRated, subject: schedule.entries.find(e => topics.includes(e.topic))?.subject });
+                }
+            });
+            if (scheduleResult.groups.length > 0) results.push(scheduleResult);
+        });
+        return results;
+    }
+
+    function getWeakAreaTopics(withinDays) {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - (withinDays || 14));
+        const cutoffStr = formatDate(cutoff);
+        const weakTopics = [];
+        getSchedules().forEach(schedule => {
+            schedule.entries.forEach(entry => {
+                let confidence = null, ratedDate = null;
+                if (entry.dayOfWeek) {
+                    const byDate = entry.confidenceByDate || {};
+                    const recent = Object.entries(byDate).filter(([d]) => d >= cutoffStr).sort((a, b) => b[0].localeCompare(a[0]));
+                    if (recent.length) { confidence = recent[0][1]; ratedDate = recent[0][0]; }
+                } else if (entry.confidence && entry.completed) {
+                    confidence = entry.confidence;
+                    ratedDate = entry.completedAt ? entry.completedAt.slice(0, 10) : null;
+                }
+                if ((confidence === 'red' || confidence === 'amber') && ratedDate >= cutoffStr) {
+                    weakTopics.push({ topic: entry.topic, subject: entry.subject, confidence, scheduleId: schedule.id, scheduleName: schedule.name, subjectColor: (schedule.subjectColors || {})[entry.subject] });
+                }
+            });
+        });
+        return weakTopics;
+    }
+
     // Returns the Monday of the week containing dateStr (YYYY-MM-DD)
     function getWeekStart(dateStr) {
         const d = new Date(dateStr + 'T00:00:00');
@@ -519,6 +585,9 @@ const DataStore = (() => {
         formatDate,
         formatDateDisplay,
         daysUntil,
-        getWeekStart
+        getWeekStart,
+        setEntryConfidence,
+        getConfidenceAnalysis,
+        getWeakAreaTopics
     };
 })();

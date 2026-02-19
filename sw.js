@@ -1,5 +1,5 @@
 // Service Worker for William's Scheduler PWA
-const CACHE_NAME = 'ws-cache-v7';
+const CACHE_NAME = 'ws-cache-v8';
 
 // Files to cache for offline use
 const PRECACHE_URLS = [

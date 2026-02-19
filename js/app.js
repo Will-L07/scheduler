@@ -104,6 +104,7 @@ const App = (() => {
             case 'dashboard': renderDashboard(); break;
             case 'schedules': renderSchedules(); break;
             case 'progress': renderProgress(); break;
+            case 'analysis': renderAnalysis(); break;
             case 'notes': renderNotes(); break;
             case 'import': break; // PdfParser handles this
             case 'settings': break; // Already wired up
@@ -132,6 +133,7 @@ const App = (() => {
         renderTodayTasks();
         renderQuickStats();
         renderCurrentPhases();
+        renderWeakAreas();
     }
 
     function renderCurrentDate() {
@@ -213,8 +215,13 @@ const App = (() => {
                 const scheduleId = item.dataset.scheduleId;
                 const entryId = item.dataset.entryId;
                 const forDate = item.dataset.forDate || null;
+                const completing = e.target.checked;
                 DataStore.toggleEntryComplete(scheduleId, entryId, forDate);
-                renderDashboard(); // Refresh
+                if (completing) {
+                    showRagPicker(item, scheduleId, entryId, forDate || DataStore.formatDate(new Date()));
+                } else {
+                    renderDashboard();
+                }
                 showToast('Task updated!', 'success');
             });
         });
@@ -299,6 +306,62 @@ const App = (() => {
         `;
     }
 
+    // ---- RAG Confidence Picker ----
+    function showRagPicker(itemEl, scheduleId, entryId, forDate) {
+        // Don't show RAG for non-academic schedules (training types have no topicGroups)
+        const schedule = DataStore.getScheduleById(scheduleId);
+        if (!schedule || !schedule.topicGroups) return;
+
+        // Remove any existing picker
+        const existing = itemEl.querySelector('.rag-picker');
+        if (existing) existing.remove();
+
+        const picker = document.createElement('div');
+        picker.className = 'rag-picker';
+        picker.innerHTML = `
+            <span class="rag-label">Confidence:</span>
+            <button class="rag-btn rag-red" data-rag="red" title="Red – not confident">R</button>
+            <button class="rag-btn rag-amber" data-rag="amber" title="Amber – getting there">A</button>
+            <button class="rag-btn rag-green" data-rag="green" title="Green – confident">G</button>
+            <button class="rag-btn rag-skip" data-rag="skip" title="Skip rating">–</button>
+        `;
+        itemEl.appendChild(picker);
+
+        picker.querySelectorAll('[data-rag]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const rating = btn.dataset.rag;
+                if (rating !== 'skip') {
+                    DataStore.setEntryConfidence(scheduleId, entryId, rating, forDate);
+                }
+                picker.remove();
+                renderDashboard();
+            });
+        });
+    }
+
+    // ---- Weak Areas Dashboard Widget ----
+    function renderWeakAreas() {
+        const container = document.getElementById('weakAreasDisplay');
+        const titleEl = document.getElementById('weakAreasSectionTitle');
+        const weakTopics = DataStore.getWeakAreaTopics(14);
+
+        if (!weakTopics || weakTopics.length === 0) {
+            container.innerHTML = '';
+            if (titleEl) titleEl.style.display = 'none';
+            return;
+        }
+
+        if (titleEl) titleEl.style.display = '';
+
+        container.innerHTML = weakTopics.map(item => `
+            <div class="weak-area-chip ${item.confidence}">
+                <span class="weak-area-subject">${escHtml(item.subject)}</span>
+                <span class="weak-area-topic">${escHtml(item.topic)}</span>
+                <span class="weak-area-badge ${item.confidence}">${item.confidence.toUpperCase()}</span>
+            </div>
+        `).join('');
+    }
+
     function renderCurrentPhases() {
         const container = document.getElementById('currentPhases');
         const schedules = DataStore.getSchedules();
@@ -319,6 +382,60 @@ const App = (() => {
         container.innerHTML = phaseCards.length
             ? phaseCards.join('')
             : '<p class="no-tasks">No active phases right now.</p>';
+    }
+
+    // ==============================
+    // ANALYSIS
+    // ==============================
+    function renderAnalysis() {
+        const container = document.getElementById('analysisContent');
+        const analysis = DataStore.getConfidenceAnalysis();
+
+        if (!analysis || analysis.length === 0) {
+            container.innerHTML = '<p class="no-tasks">No confidence data yet. Complete tasks and rate your confidence to see analysis here.</p>';
+            return;
+        }
+
+        container.innerHTML = analysis.map(group => {
+            const total = group.red + group.amber + group.green;
+            const redPct = Math.round((group.red / total) * 100);
+            const amberPct = Math.round((group.amber / total) * 100);
+            const greenPct = Math.round((group.green / total) * 100);
+
+            const topicRows = group.topics.map(t => {
+                const badge = t.confidence
+                    ? `<span class="rag-badge ${t.confidence}">${t.confidence.toUpperCase()}</span>`
+                    : `<span class="rag-badge unrated">–</span>`;
+                return `
+                    <div class="analysis-topic-row">
+                        <span class="analysis-topic-name">${escHtml(t.topic)}</span>
+                        ${badge}
+                        <span class="analysis-topic-date">${t.ratedOn ? DataStore.formatDateDisplay(t.ratedOn) : ''}</span>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="analysis-group-card">
+                    <div class="analysis-group-header">
+                        <span class="analysis-group-name">${escHtml(group.groupName)}</span>
+                        <span class="analysis-group-schedule">${escHtml(group.scheduleName)}</span>
+                    </div>
+                    <div class="analysis-rag-bar">
+                        <div class="rag-segment red" style="width:${redPct}%" title="${group.red} Red"></div>
+                        <div class="rag-segment amber" style="width:${amberPct}%" title="${group.amber} Amber"></div>
+                        <div class="rag-segment green" style="width:${greenPct}%" title="${group.green} Green"></div>
+                    </div>
+                    <div class="analysis-rag-counts">
+                        <span class="rag-count red">${group.red} Red</span>
+                        <span class="rag-count amber">${group.amber} Amber</span>
+                        <span class="rag-count green">${group.green} Green</span>
+                    </div>
+                    <div class="analysis-feedback">${escHtml(group.feedback)}</div>
+                    <div class="analysis-topics">${topicRows}</div>
+                </div>
+            `;
+        }).join('');
     }
 
     // ==============================
@@ -823,7 +940,7 @@ const App = (() => {
     }
 
     // Expose for other modules
-    return { init, switchView, showToast, renderDashboard, refresh };
+    return { init, switchView, showToast, renderDashboard, refresh, renderAnalysis };
 })();
 
 // ---- Start ----

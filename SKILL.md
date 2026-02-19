@@ -35,6 +35,11 @@ Each schedule object:
     "Maths": "#f59e0b",
     "Chemistry": "#3b82f6"
   },
+  "topicGroups": {
+    "Mechanics": ["Forces and Newton's laws", "Momentum", "Circular motion"],
+    "Electricity": ["Current and voltage", "Resistors", "EMF and internal resistance"],
+    "Algebra": ["Quadratics", "Simultaneous equations", "Logarithms"]
+  },
   "weeklyReset": false,
   "phases": [
     {"name": "Phase 1", "startDate": "2026-02-09", "endDate": "2026-03-26"}
@@ -49,6 +54,7 @@ Each schedule object:
 
 - `type`: "revision", "training", or "custom"
 - `subjectColors`: Optional. Maps each subject name to a hex color. Subjects without a color will show as plain text. **Always include this** — assign a distinct color to every subject in the schedule.
+- `topicGroups`: Optional but **strongly recommended for revision/academic schedules**. Groups topics into named areas for confidence analysis. The keys are group names (e.g. a chapter, field, or syllabus section) and the values are arrays of topic strings. Topics must match exactly the `topic` field values of entries. Used by the Analysis page to show Red/Amber/Green confidence breakdowns per group.
 - `weeklyReset`: **Always include this field.** Set to `true` for training/fitness schedules with recurring entries (sessions stay checked all week, reset each Monday). Set to `false` for revision schedules.
 - `phases`: Required for recurring entries. Dates are YYYY-MM-DD.
 - `exams`: Optional. `session` is "AM" or "PM".
@@ -96,6 +102,7 @@ There are two entry types. Choose based on the schedule's duration:
 - **IMPORTANT: Never mix entry types for the same day.** If a schedule uses dated entries, ALL entries should be dated. If a schedule uses recurring entries, ALL entries should be recurring. Do not mix `date: null` and `date: "YYYY-MM-DD"` entries within the same schedule.
 - **Default to dated entries.** Only use recurring entries when the schedule spans 3+ weeks and tasks repeat identically each week.
 - **Training schedules with recurring entries MUST include `"weeklyReset": true`** at the schedule level. Revision schedules MUST include `"weeklyReset": false`.
+- **`topicGroups` must use exact topic strings.** The topic strings in each group's array must match exactly (case-sensitive) the `topic` field values of entries in the schedule. The app uses these to map confidence ratings to groups. If a topic name in entries doesn't appear in any group, it won't appear in analysis.
 
 ## GUIDELINES
 
@@ -104,6 +111,7 @@ There are two entry types. Choose based on the schedule's duration:
 - Use descriptive phase names like "Phase 1: Foundation" or "Phase 2: Intensity".
 - Pick distinct hex colors for each schedule so they're easy to tell apart in the app.
 - **Always include `subjectColors`** with a distinct hex color for every subject used in the schedule. Use visually distinct, readable colors (avoid very light or very dark shades). Good defaults: red `#ef4444`, amber `#f59e0b`, blue `#3b82f6`, green `#10b981`, purple `#8b5cf6`, indigo `#6366f1`, pink `#ec4899`, teal `#14b8a6`.
+- **For revision/academic schedules, always include `topicGroups`**. Group topics by syllabus chapter, field of study, or exam section. Each group should contain 3-8 related topics. Match the topic strings exactly to the `topic` fields in entries.
 - `weeklyReset` is already enforced as a RULE above — do not omit it from any schedule.
 - If the user mentions exam dates, include them in the exams array.
 - Do NOT print the JSON as a code block in the chat. Write it to a file using the Write tool and give the user the file path to import.
