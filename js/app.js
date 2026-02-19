@@ -339,7 +339,7 @@ const App = (() => {
                     DataStore.setEntryConfidence(scheduleId, entryId, rating, forDate);
                 }
                 picker.remove();
-                done();
+                done(rating);
             });
         });
     }
@@ -553,7 +553,14 @@ const App = (() => {
                 const scheduleId = item.dataset.scheduleId;
                 const entryId = item.dataset.entryId;
                 const forDate = item.dataset.forDate;
-                showRagPicker(item, scheduleId, entryId, forDate, () => renderSchedules());
+                showRagPicker(item, scheduleId, entryId, forDate, (rating) => {
+                    // Update button in-place — no re-render so the schedule stays open
+                    if (rating && rating !== 'skip') {
+                        btn.className = `entry-rate-btn ${rating}`;
+                        btn.textContent = rating[0].toUpperCase();
+                        btn.title = `Confidence: ${rating} — click to change`;
+                    }
+                });
             });
         });
     }
