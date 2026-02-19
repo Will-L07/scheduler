@@ -491,28 +491,41 @@ const DataStore = (() => {
         const results = [];
         getSchedules().forEach(schedule => {
             if (!schedule.topicGroups) return;
-            const scheduleResult = { scheduleName: schedule.name, scheduleColor: schedule.color, subjectColors: schedule.subjectColors || {}, groups: [] };
-            Object.entries(schedule.topicGroups).forEach(([groupName, topics]) => {
-                const ratings = { red: 0, amber: 0, green: 0, total: 0 };
-                let lastRated = null;
-                schedule.entries.forEach(entry => {
-                    if (!topics.includes(entry.topic)) return;
+            Object.entries(schedule.topicGroups).forEach(([groupName, topicNames]) => {
+                let red = 0, amber = 0, green = 0;
+                const topicRows = topicNames.map(topicName => {
+                    const entry = schedule.entries.find(e => e.topic === topicName);
+                    if (!entry) return { topic: topicName, confidence: null, ratedOn: null };
+                    let confidence = null, ratedOn = null;
                     if (entry.dayOfWeek) {
-                        Object.entries(entry.confidenceByDate || {}).forEach(([date, c]) => {
-                            if (c && ratings[c] !== undefined) { ratings[c]++; ratings.total++; }
-                            if (!lastRated || date > lastRated) lastRated = date;
-                        });
-                    } else if (entry.confidence) {
-                        ratings[entry.confidence]++;
-                        ratings.total++;
-                        if (!lastRated || (entry.completedAt && entry.completedAt > lastRated)) lastRated = entry.completedAt;
+                        const byDate = Object.entries(entry.confidenceByDate || {});
+                        if (byDate.length) {
+                            byDate.sort((a, b) => b[0].localeCompare(a[0]));
+                            confidence = byDate[0][1];
+                            ratedOn = byDate[0][0];
+                        }
+                    } else {
+                        confidence = entry.confidence || null;
+                        ratedOn = entry.completedAt ? entry.completedAt.slice(0, 10) : null;
                     }
+                    if (confidence === 'red') red++;
+                    else if (confidence === 'amber') amber++;
+                    else if (confidence === 'green') green++;
+                    return { topic: topicName, confidence, ratedOn };
                 });
-                if (ratings.total > 0) {
-                    scheduleResult.groups.push({ groupName, ratings, lastRated, subject: schedule.entries.find(e => topics.includes(e.topic))?.subject });
-                }
+
+                const rated = red + amber + green;
+                if (rated === 0) return; // skip groups with no ratings yet
+
+                let feedback;
+                const redPct = Math.round((red / rated) * 100);
+                const greenPct = Math.round((green / rated) * 100);
+                if (redPct >= 50) feedback = 'Needs significant work — revisit core concepts and practice questions.';
+                else if (redPct > 0 || amber > 0) feedback = 'Making progress — focus more practice on the amber and red topics.';
+                else feedback = 'Strong understanding — keep refreshing to maintain confidence.';
+
+                results.push({ groupName, scheduleName: schedule.name, red, amber, green, feedback, topics: topicRows });
             });
-            if (scheduleResult.groups.length > 0) results.push(scheduleResult);
         });
         return results;
     }
