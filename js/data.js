@@ -161,18 +161,21 @@ const DataStore = (() => {
                 if (matches) {
                     // For recurring entries, resolve per-date completion and notes
                     const isRecurring = !!entry.dayOfWeek;
+                    const completionKey = (isRecurring && schedule.weeklyReset)
+                        ? getWeekStart(dateStr)
+                        : dateStr;
                     const completedForDate = isRecurring
-                        ? (entry.completedDates || []).includes(dateStr)
+                        ? (entry.completedDates || []).includes(completionKey)
                         : entry.completed;
                     const notesForDate = isRecurring
-                        ? ((entry.notesByDate || {})[dateStr] || '')
+                        ? ((entry.notesByDate || {})[completionKey] || '')
                         : (entry.notes || '');
 
                     tasks.push({
                         ...entry,
                         completed: completedForDate,
                         notes: notesForDate,
-                        _forDate: dateStr,
+                        _forDate: completionKey,
                         scheduleId: schedule.id,
                         scheduleName: schedule.name,
                         scheduleColor: schedule.color
@@ -472,6 +475,15 @@ const DataStore = (() => {
         return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
 
+    // Returns the Monday of the week containing dateStr (YYYY-MM-DD)
+    function getWeekStart(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        const day = d.getDay(); // 0 = Sun, 1 = Mon, ...
+        const diff = day === 0 ? 6 : day - 1;
+        d.setDate(d.getDate() - diff);
+        return formatDate(d);
+    }
+
     return {
         generateId,
         getSchedules,
@@ -506,6 +518,7 @@ const DataStore = (() => {
         resetAll,
         formatDate,
         formatDateDisplay,
-        daysUntil
+        daysUntil,
+        getWeekStart
     };
 })();

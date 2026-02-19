@@ -6,7 +6,9 @@ const App = (() => {
     // ---- Init ----
     function init() {
         SeedData.seed();
+        migrateWeeklyReset();
         applyTheme(DataStore.getSettings().theme);
+        applySubjectColors();
         setupNavigation();
         setupHamburger();
         setupSettings();
@@ -28,7 +30,48 @@ const App = (() => {
     }
 
     function refresh() {
+        applySubjectColors();
         renderDashboard();
+    }
+
+    // ---- One-time migrations ----
+    function migrateWeeklyReset() {
+        const hike = DataStore.getScheduleById('hike-2026');
+        if (hike && !hike.weeklyReset) {
+            DataStore.updateSchedule('hike-2026', { weeklyReset: true });
+        }
+    }
+
+    // ---- Dynamic Subject Colors ----
+    function getSubjectColorMap() {
+        const map = {};
+        DataStore.getSchedules().forEach(s => {
+            if (s.subjectColors) {
+                Object.entries(s.subjectColors).forEach(([subject, color]) => {
+                    map[subject] = color;
+                });
+            }
+        });
+        return map;
+    }
+
+    function subjectBadgeStyle(subject, scheduleId) {
+        const schedule = DataStore.getScheduleById(scheduleId);
+        const color = schedule && schedule.subjectColors && schedule.subjectColors[subject];
+        return color ? `style="background:${color};color:white;"` : '';
+    }
+
+    function applySubjectColors() {
+        let style = document.getElementById('dynamic-subject-colors');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'dynamic-subject-colors';
+            document.head.appendChild(style);
+        }
+        const colors = getSubjectColorMap();
+        style.textContent = Object.entries(colors).map(([subject, color]) =>
+            `.task-subject[data-subject="${CSS.escape(subject)}"] { background: ${color}; color: white; }`
+        ).join('\n');
     }
 
     // ---- Navigation ----
@@ -151,7 +194,7 @@ const App = (() => {
         container.innerHTML = tasks.map(task => `
             <div class="task-item ${task.completed ? 'completed' : ''}" data-schedule-id="${task.scheduleId}" data-entry-id="${task.id}" data-for-date="${task._forDate || ''}">
                 <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-                <span class="task-subject" data-subject="${escHtml(task.subject)}">${escHtml(task.subject)}</span>
+                <span class="task-subject" data-subject="${escHtml(task.subject)}" ${subjectBadgeStyle(task.subject, task.scheduleId)}>${escHtml(task.subject)}</span>
                 <div class="task-details">
                     <div class="task-topic">${escHtml(task.topic)}</div>
                     <div class="task-meta">${escHtml(task.taskFocus || '')}</div>
@@ -410,10 +453,12 @@ const App = (() => {
                         const dayLabel = entry.date
                             ? dayNames[new Date(entry.date + 'T00:00:00').getDay()]
                             : '';
-                        // For recurring entries, show completion for today only
                         const isRecurring = !!entry.dayOfWeek;
+                        const completionKey = (isRecurring && schedule.weeklyReset)
+                            ? DataStore.getWeekStart(today)
+                            : today;
                         const isCompletedToday = isRecurring
-                            ? (entry.completedDates || []).includes(today)
+                            ? (entry.completedDates || []).includes(completionKey)
                             : entry.completed;
                         const totalCompleted = isRecurring
                             ? (entry.completedDates || []).length
@@ -422,10 +467,10 @@ const App = (() => {
                             ? `<span style="font-size:0.75rem; color:var(--success); margin-left:0.5rem;">${totalCompleted} done</span>`
                             : '';
                         return `
-                            <div class="schedule-entry ${isCompletedToday ? 'completed' : ''}" data-schedule-id="${schedule.id}" data-entry-id="${entry.id}" data-for-date="${isRecurring ? today : ''}">
+                            <div class="schedule-entry ${isCompletedToday ? 'completed' : ''}" data-schedule-id="${schedule.id}" data-entry-id="${entry.id}" data-for-date="${isRecurring ? completionKey : ''}">
                                 <input type="checkbox" class="task-checkbox" ${isCompletedToday ? 'checked' : ''}>
                                 <span class="entry-day">${dayLabel}</span>
-                                <span class="task-subject" data-subject="${escHtml(entry.subject)}">${escHtml(entry.subject)}</span>
+                                <span class="task-subject" data-subject="${escHtml(entry.subject)}" ${subjectBadgeStyle(entry.subject, schedule.id)}>${escHtml(entry.subject)}</span>
                                 <span style="flex:1; font-size: 0.85rem;">${escHtml(entry.topic)}${recurringInfo}</span>
                                 <span class="task-duration">${escHtml(entry.duration)}</span>
                             </div>
@@ -490,7 +535,7 @@ const App = (() => {
         const container = document.getElementById('progressBySubject');
         const subjects = DataStore.getProgressBySubject();
 
-        const subjectColors = {
+        const defaultSubjectColors = {
             'AS FM': 'var(--subject-asfm)',
             'Physics': 'var(--subject-physics)',
             'Maths': 'var(--subject-maths)',
@@ -505,6 +550,7 @@ const App = (() => {
             'Long Walk': 'var(--subject-hiking)',
             'Active Recovery': 'var(--subject-hiking)'
         };
+        const dynamicColors = getSubjectColorMap();
 
         container.innerHTML = Object.entries(subjects).map(([subject, data]) => `
             <div class="progress-card">
@@ -513,7 +559,7 @@ const App = (() => {
                     <span class="progress-percent">${data.percent}% (${data.completed}/${data.total})</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${data.percent}%; background: ${subjectColors[subject] || 'var(--accent)'}"></div>
+                    <div class="progress-fill" style="width: ${data.percent}%; background: ${dynamicColors[subject] || defaultSubjectColors[subject] || 'var(--accent)'}"></div>
                 </div>
             </div>
         `).join('');

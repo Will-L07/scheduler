@@ -123,6 +123,7 @@ const PdfParser = (() => {
                 const data = JSON.parse(text);
                 const count = (data.schedules || []).reduce((sum, s) => sum + (s.entries || []).length, 0);
                 const names = (data.schedules || []).map(s => s.name).join(', ');
+                App.refresh();
                 App.showToast(`Imported "${names}" with ${count} entries!`, 'success');
                 App.switchView('schedules');
             } else {

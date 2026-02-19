@@ -504,6 +504,7 @@ const SeedData = (() => {
             name: 'Hiking & Mountaineering Fitness',
             type: 'training',
             color: '#8B5CF6',
+            weeklyReset: true,
             phases: [
                 { name: 'Phase 1: Foundation', startDate: '2026-02-10', endDate: '2026-03-16' },
                 { name: 'Phase 2: Load Up', startDate: '2026-03-17', endDate: '2026-04-19' },
