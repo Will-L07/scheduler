@@ -238,7 +238,6 @@ body {
 .task-item {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     gap: 0.75rem;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
@@ -1137,12 +1136,13 @@ label {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-top: 0.5rem;
-    padding: 0.4rem 0.6rem;
-    background: var(--surface-2, #f1f5f9);
-    border-radius: 8px;
-    flex-wrap: wrap;
-    width: 100%;
+    margin-top: 0.4rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
 .rag-label {

@@ -315,20 +315,21 @@ const App = (() => {
             return;
         }
 
-        // Remove any existing picker
-        const existing = itemEl.querySelector('.rag-picker');
-        if (existing) existing.remove();
+        // Remove any existing picker (inserted as next sibling)
+        const existing = itemEl.nextElementSibling;
+        if (existing && existing.classList.contains('rag-picker')) existing.remove();
 
         const picker = document.createElement('div');
         picker.className = 'rag-picker';
         picker.innerHTML = `
-            <span class="rag-label">Confidence:</span>
+            <span class="rag-label">How confident are you?</span>
             <button class="rag-btn rag-red" data-rag="red" title="Red – not confident">R</button>
             <button class="rag-btn rag-amber" data-rag="amber" title="Amber – getting there">A</button>
             <button class="rag-btn rag-green" data-rag="green" title="Green – confident">G</button>
             <button class="rag-btn rag-skip" data-rag="skip" title="Skip rating">–</button>
         `;
-        itemEl.appendChild(picker);
+        // Insert after the task-item, not inside it, to avoid flex layout conflicts
+        itemEl.insertAdjacentElement('afterend', picker);
 
         picker.querySelectorAll('[data-rag]').forEach(btn => {
             btn.addEventListener('click', () => {
