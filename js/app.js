@@ -400,43 +400,67 @@ const App = (() => {
             return;
         }
 
-        container.innerHTML = analysis.map(group => {
+        // Group by subject
+        const bySubject = {};
+        analysis.forEach(group => {
+            if (!bySubject[group.subject]) bySubject[group.subject] = { color: group.subjectColor, groups: [] };
+            bySubject[group.subject].groups.push(group);
+        });
+        const subjects = Object.keys(bySubject);
+
+        function buildGroupCard(group) {
             const totalTopics = group.topics.length;
             const ratedPct = Math.round(((group.red + group.amber + group.green) / totalTopics) * 100);
-
             const topicRows = group.topics.map(t => {
                 const badge = t.confidence
                     ? `<span class="rag-badge ${t.confidence}">${t.confidence.toUpperCase()}</span>`
                     : `<span class="rag-badge unrated">–</span>`;
-                return `
-                    <div class="analysis-topic-row">
-                        <span class="analysis-topic-name">${escHtml(t.topic)}</span>
-                        ${badge}
-                        <span class="analysis-topic-date">${t.ratedOn ? DataStore.formatDateDisplay(t.ratedOn) : ''}</span>
-                    </div>
-                `;
+                return `<div class="analysis-topic-row">
+                    <span class="analysis-topic-name">${escHtml(t.topic)}</span>
+                    ${badge}
+                    <span class="analysis-topic-date">${t.ratedOn ? DataStore.formatDateDisplay(t.ratedOn) : ''}</span>
+                </div>`;
             }).join('');
-
-            return `
-                <div class="analysis-group-card">
-                    <div class="analysis-group-header">
-                        <span class="analysis-group-name">${escHtml(group.groupName)}</span>
-                        <span class="analysis-group-schedule">${escHtml(group.scheduleName)}</span>
-                    </div>
-                    <div class="analysis-rag-bar">
-                        <div class="analysis-rag-fill" style="width:${ratedPct}%"></div>
-                    </div>
-                    <div class="analysis-rag-counts">
-                        <span class="rag-count red">${group.red} Red</span>
-                        <span class="rag-count amber">${group.amber} Amber</span>
-                        <span class="rag-count green">${group.green} Green</span>
-                        <span class="rag-count muted">${totalTopics - group.red - group.amber - group.green} Unrated</span>
-                    </div>
-                    <div class="analysis-feedback">${escHtml(group.feedback)}</div>
-                    <div class="analysis-topics">${topicRows}</div>
+            return `<div class="analysis-group-card">
+                <div class="analysis-group-header">
+                    <span class="analysis-group-name">${escHtml(group.groupName)}</span>
+                    <span class="analysis-group-schedule">${escHtml(group.scheduleName)}</span>
                 </div>
-            `;
+                <div class="analysis-rag-bar"><div class="analysis-rag-fill" style="width:${ratedPct}%"></div></div>
+                <div class="analysis-rag-counts">
+                    <span class="rag-count red">${group.red} Red</span>
+                    <span class="rag-count amber">${group.amber} Amber</span>
+                    <span class="rag-count green">${group.green} Green</span>
+                    <span class="rag-count muted">${totalTopics - group.red - group.amber - group.green} Unrated</span>
+                </div>
+                <div class="analysis-feedback">${escHtml(group.feedback)}</div>
+                <div class="analysis-topics">${topicRows}</div>
+            </div>`;
+        }
+
+        const tabsHtml = subjects.map((subject, i) => {
+            const color = bySubject[subject].color;
+            const colorAttr = color ? `style="--tab-color:${color}"` : '';
+            return `<button class="analysis-tab ${i === 0 ? 'active' : ''}" data-subject="${escHtml(subject)}" ${colorAttr}>${escHtml(subject)}</button>`;
         }).join('');
+
+        const panelsHtml = subjects.map((subject, i) =>
+            `<div class="analysis-panel ${i === 0 ? 'active' : ''}" data-panel="${escHtml(subject)}">
+                ${bySubject[subject].groups.map(buildGroupCard).join('')}
+            </div>`
+        ).join('');
+
+        container.innerHTML = `<div class="analysis-tabs">${tabsHtml}</div><div class="analysis-panels">${panelsHtml}</div>`;
+
+        container.querySelectorAll('.analysis-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                container.querySelectorAll('.analysis-tab').forEach(t => t.classList.remove('active'));
+                container.querySelectorAll('.analysis-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                const panel = container.querySelector(`.analysis-panel[data-panel="${tab.dataset.subject}"]`);
+                if (panel) panel.classList.add('active');
+            });
+        });
     }
 
     // ==============================

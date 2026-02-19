@@ -1335,3 +1335,41 @@ label {
     font-size: 0.72rem;
     color: var(--text-muted);
 }
+
+/* Analysis subject tabs */
+.analysis-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.analysis-tab {
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    border: 2px solid var(--tab-color, var(--border-color));
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.analysis-tab:hover {
+    background: var(--bg-tertiary);
+}
+
+.analysis-tab.active {
+    background: var(--tab-color, var(--accent));
+    border-color: var(--tab-color, var(--accent));
+    color: white;
+}
+
+.analysis-panel {
+    display: none;
+}
+
+.analysis-panel.active {
+    display: block;
+}

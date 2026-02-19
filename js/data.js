@@ -524,7 +524,10 @@ const DataStore = (() => {
                 else if (redPct > 0 || amber > 0) feedback = 'Making progress — focus more practice on the amber and red topics.';
                 else feedback = 'Strong understanding — keep refreshing to maintain confidence.';
 
-                results.push({ groupName, scheduleName: schedule.name, red, amber, green, feedback, topics: topicRows });
+                const firstEntry = schedule.entries.find(e => topicNames.includes(e.topic));
+                const subject = firstEntry ? firstEntry.subject : 'Other';
+                const subjectColor = (schedule.subjectColors || {})[subject] || null;
+                results.push({ groupName, scheduleName: schedule.name, subject, subjectColor, red, amber, green, feedback, topics: topicRows });
             });
         });
         return results;
