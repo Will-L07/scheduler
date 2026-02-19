@@ -1267,8 +1267,8 @@ label {
 
 .analysis-rag-bar {
     display: flex;
-    height: 10px;
-    border-radius: 5px;
+    height: 6px;
+    border-radius: 3px;
     overflow: hidden;
     margin-bottom: 0.5rem;
     background: var(--border-color, #e2e8f0);

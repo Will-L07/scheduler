@@ -401,10 +401,10 @@ const App = (() => {
         }
 
         container.innerHTML = analysis.map(group => {
-            const total = group.red + group.amber + group.green;
-            const redPct = Math.round((group.red / total) * 100);
-            const amberPct = Math.round((group.amber / total) * 100);
-            const greenPct = Math.round((group.green / total) * 100);
+            const totalTopics = group.topics.length;
+            const redPct = Math.round((group.red / totalTopics) * 100);
+            const amberPct = Math.round((group.amber / totalTopics) * 100);
+            const greenPct = Math.round((group.green / totalTopics) * 100);
 
             const topicRows = group.topics.map(t => {
                 const badge = t.confidence
