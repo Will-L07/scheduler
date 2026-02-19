@@ -153,13 +153,34 @@ body {
 }
 
 .section-title {
-    font-size: 1.05rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text-secondary);
     margin: 1.75rem 0 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-size: 0.8rem;
+}
+
+button.section-title.collapsible-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+}
+
+button.section-title.collapsible-toggle:hover {
+    color: var(--text-primary);
+}
+
+.collapsible-chevron {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+    margin-left: 0.4rem;
 }
 
 /* ===== CARDS ===== */

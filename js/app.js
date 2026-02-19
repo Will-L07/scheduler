@@ -631,6 +631,22 @@ const App = (() => {
         renderProgressBySchedule();
         renderProgressBySubject();
         renderStreak();
+        setupSubjectToggle();
+    }
+
+    function setupSubjectToggle() {
+        const btn = document.getElementById('subjectToggle');
+        const body = document.getElementById('progressBySubject');
+        if (!btn || !body) return;
+        // Re-attach (cloneNode removes stale listeners from previous renderProgress calls)
+        const fresh = btn.cloneNode(true);
+        btn.parentNode.replaceChild(fresh, btn);
+        fresh.addEventListener('click', () => {
+            const expanded = fresh.getAttribute('aria-expanded') === 'true';
+            fresh.setAttribute('aria-expanded', String(!expanded));
+            body.style.display = expanded ? 'none' : '';
+            fresh.querySelector('.collapsible-chevron').style.transform = expanded ? '' : 'rotate(180deg)';
+        });
     }
 
     function renderProgressOverview() {
