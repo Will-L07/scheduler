@@ -1240,8 +1240,8 @@ label {
    ANALYSIS PAGE
    ============================== */
 .analysis-group-card {
-    background: var(--card-bg, white);
-    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1.25rem;
@@ -1266,17 +1266,19 @@ label {
 }
 
 .analysis-rag-bar {
-    display: flex;
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border-radius: 4px;
     overflow: hidden;
     margin-bottom: 0.5rem;
-    background: var(--border-color, #e2e8f0);
+    background: var(--progress-bg);
 }
 
-.rag-segment.red   { background: #ef4444; }
-.rag-segment.amber { background: #f59e0b; }
-.rag-segment.green { background: #22c55e; }
+.analysis-rag-fill {
+    height: 100%;
+    background: var(--progress-fill);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
 
 .analysis-rag-counts {
     display: flex;
@@ -1292,12 +1294,13 @@ label {
 .rag-count.red   { color: #dc2626; }
 .rag-count.amber { color: #d97706; }
 .rag-count.green { color: #16a34a; }
+.rag-count.muted { color: var(--text-muted); }
 
 .analysis-feedback {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    background: var(--surface-2, #f8fafc);
-    border-left: 3px solid var(--accent, #4a90d9);
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--accent);
     padding: 0.5rem 0.75rem;
     border-radius: 0 6px 6px 0;
     margin-bottom: 1rem;
@@ -1315,7 +1318,7 @@ label {
     align-items: center;
     gap: 0.5rem;
     padding: 0.3rem 0;
-    border-bottom: 1px solid var(--border-color, #f1f5f9);
+    border-bottom: 1px solid var(--border-color);
     font-size: 0.85rem;
 }
 
@@ -1330,5 +1333,5 @@ label {
 
 .analysis-topic-date {
     font-size: 0.72rem;
-    color: var(--text-muted, #94a3b8);
+    color: var(--text-muted);
 }

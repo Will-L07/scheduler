@@ -402,9 +402,7 @@ const App = (() => {
 
         container.innerHTML = analysis.map(group => {
             const totalTopics = group.topics.length;
-            const redPct = Math.round((group.red / totalTopics) * 100);
-            const amberPct = Math.round((group.amber / totalTopics) * 100);
-            const greenPct = Math.round((group.green / totalTopics) * 100);
+            const ratedPct = Math.round(((group.red + group.amber + group.green) / totalTopics) * 100);
 
             const topicRows = group.topics.map(t => {
                 const badge = t.confidence
@@ -426,14 +424,13 @@ const App = (() => {
                         <span class="analysis-group-schedule">${escHtml(group.scheduleName)}</span>
                     </div>
                     <div class="analysis-rag-bar">
-                        <div class="rag-segment red" style="width:${redPct}%" title="${group.red} Red"></div>
-                        <div class="rag-segment amber" style="width:${amberPct}%" title="${group.amber} Amber"></div>
-                        <div class="rag-segment green" style="width:${greenPct}%" title="${group.green} Green"></div>
+                        <div class="analysis-rag-fill" style="width:${ratedPct}%"></div>
                     </div>
                     <div class="analysis-rag-counts">
                         <span class="rag-count red">${group.red} Red</span>
                         <span class="rag-count amber">${group.amber} Amber</span>
                         <span class="rag-count green">${group.green} Green</span>
+                        <span class="rag-count muted">${totalTopics - group.red - group.amber - group.green} Unrated</span>
                     </div>
                     <div class="analysis-feedback">${escHtml(group.feedback)}</div>
                     <div class="analysis-topics">${topicRows}</div>
